@@ -15,7 +15,12 @@ class Settings(BaseSettings):
 
     @property
     def configured(self) -> bool:
-        return bool(self.supabase_url and self.supabase_service_role_key)
+        key = (self.supabase_service_role_key or "").strip()
+        return bool(
+            self.supabase_url
+            and key
+            and key not in {"REPLACE_ME", "changeme", "todo"}
+        )
 
 
 @lru_cache
