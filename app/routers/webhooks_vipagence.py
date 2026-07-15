@@ -67,6 +67,12 @@ async def vipagence_webhook(
 
     event_type_log = payload.get("event_type") or payload.get("type")
 
+    if not settings.configured:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"ok": False, "error": "Supabase service_role not configured"},
+        )
+
     try:
         client = get_admin_client()
         result = process_webhook(client, payload)
