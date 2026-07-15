@@ -1,8 +1,10 @@
 # Vipagence → VIPA — contrat webhook
 
-Récepteur : **`https://api-vipa.3geeks.fr`** (Coolify / Traefik :443).  
+Récepteur : **`https://api-vipa.3geeks.fr`** (Coolify UUID `dzyouw31lgllkv254xiamlsf` / Traefik :443).  
 Persistance : Postgres Supabase VIPA via `SUPABASE_SERVICE_ROLE_KEY`.  
 Pas d’Edge Function Supabase ni de Cloudflare Worker.
+
+Prérequis ops : appliquer [`supabase/migrations/005_vipagence.sql`](../supabase/migrations/005_vipagence.sql) sur le projet Supabase VIPA, puis renseigner `SUPABASE_SERVICE_ROLE_KEY` + `SUPABASE_JWT_SECRET` dans Coolify (voir [`INFRA_SECRETS.md`](INFRA_SECRETS.md)).
 
 ## Endpoints
 
