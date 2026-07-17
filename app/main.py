@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.logging_setup import setup_logging
-from app.routers import billing, health, webhooks_stripe, webhooks_vipagence
+from app.routers import billing, health, legal, webhooks_stripe, webhooks_vipagence
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(legal.router)
 app.include_router(webhooks_vipagence.router)
 app.include_router(webhooks_stripe.router)
 app.include_router(billing.router)

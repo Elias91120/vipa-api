@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Support — VIPA</title>
+  <meta name="description" content="Support et contact pour l’application VIPA (3Geeks)." />
+  <style>
+    :root {
+      --primary: #006565;
+      --bg: #f7f9fb;
+      --fg: #191c1e;
+      --muted: #3e4949;
+      --surface: #ffffff;
+      --border: #bdc9c8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, #e6f4f4 0%, var(--bg) 40%);
+      color: var(--fg);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    main {
+      max-width: 36rem;
+      margin: 0 auto;
+      padding: 3rem 1.25rem;
+    }
+    .brand {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 0;
+    }
+    h1 { font-size: 1.4rem; margin: 0.75rem 0 0.5rem; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.35rem;
+      margin-top: 1.25rem;
+    }
+    p { color: var(--muted); margin: 0 0 0.75rem; }
+    a.cta {
+      display: inline-block;
+      margin-top: 0.5rem;
+      background: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 0.85rem 1.2rem;
+      border-radius: 10px;
+      min-height: 44px;
+    }
+    a.secondary { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">VIPA</p>
+    <h1>Aide &amp; support</h1>
+    <p>Une question sur le compte, l’abonnement ou la confidentialité ? Notre équipe vous répond.</p>
+    <div class="card">
+      <p><strong>E-mail</strong></p>
+      <p>support@3geeks.fr</p>
+      <a class="cta" href="mailto:support@3geeks.fr?subject=Support%20VIPA">Contacter le support</a>
+      <p style="margin-top:1.25rem">
+        <a class="secondary" href="/privacy">Politique de confidentialité</a>
+      </p>
+    </div>
+  </main>
+</body>
+</html>
