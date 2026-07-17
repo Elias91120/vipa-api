@@ -47,7 +47,8 @@ def get_current_user_id(
         return sub
 
     # Fallback: validate via Supabase Auth API (no JWT secret required)
-    if not settings.supabase_url or not settings.supabase_service_role_key:
+    admin_key = settings.supabase_admin_key
+    if not settings.supabase_url or not admin_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Supabase auth not configured",
@@ -58,7 +59,7 @@ def get_current_user_id(
             f"{settings.supabase_url.rstrip('/')}/auth/v1/user",
             headers={
                 "Authorization": f"Bearer {token}",
-                "apikey": settings.supabase_service_role_key,
+                "apikey": admin_key,
             },
             timeout=10.0,
         )

@@ -7,7 +7,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     supabase_url: str = ""
+    # Prefer new sb_secret_* ; legacy JWT service_role still accepted
+    supabase_secret_key: str = ""
     supabase_service_role_key: str = ""
+    supabase_publishable_key: str = ""
     supabase_jwt_secret: str = ""
     vipagence_webhook_secret: str = ""
     stripe_secret_key: str = ""
@@ -20,8 +23,13 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     @property
+    def supabase_admin_key(self) -> str:
+        """Secret / service_role key for Auth Admin + PostgREST bypass RLS."""
+        return (self.supabase_secret_key or self.supabase_service_role_key or "").strip()
+
+    @property
     def configured(self) -> bool:
-        key = (self.supabase_service_role_key or "").strip()
+        key = self.supabase_admin_key
         return bool(
             self.supabase_url
             and key
