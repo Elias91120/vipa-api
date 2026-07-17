@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.logging_setup import setup_logging
-from app.routers import health, webhooks_vipagence
+from app.routers import billing, health, webhooks_stripe, webhooks_vipagence
 
 
 @asynccontextmanager
@@ -17,8 +17,8 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(
     title="VIPA API",
-    description="Side API for Vipagence webhooks — Coolify api-vipa.3geeks.fr",
-    version="1.0.0",
+    description="Side API — Vipagence webhooks + Stripe billing — Coolify api-vipa.3geeks.fr",
+    version="1.1.0",
     lifespan=lifespan,
 )
 
@@ -32,3 +32,5 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(webhooks_vipagence.router)
+app.include_router(webhooks_stripe.router)
+app.include_router(billing.router)

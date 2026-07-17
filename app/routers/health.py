@@ -29,4 +29,5 @@ def health() -> dict:
         "status": status,
         "service": "api-vipa",
         "supabase": supabase_ok,
+        "stripe": settings.stripe_configured,
     }
