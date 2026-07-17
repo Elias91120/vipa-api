@@ -14,12 +14,13 @@ def health() -> dict:
     supabase_ok: bool | None = None
     if settings.configured:
         try:
-            from app.services.supabase_admin import get_admin_client
+            from app.services.supabase_admin import supabase_rest_get
 
-            client = get_admin_client()
-            # Lightweight check: auth admin does not hit user tables
-            client.table("profiles").select("id").limit(1).execute()
-            supabase_ok = True
+            # Lightweight REST probe (apikey header — works with sb_secret_* and JWT)
+            res = supabase_rest_get("profiles", params={"select": "id", "limit": "1"})
+            supabase_ok = res.status_code in (200, 206)
+            if not supabase_ok:
+                logger.warning("health_supabase_status status=%s", res.status_code)
         except Exception as exc:
             logger.warning("health_supabase_error error=%s", type(exc).__name__)
             supabase_ok = False

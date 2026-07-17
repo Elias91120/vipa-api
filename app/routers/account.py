@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.config import Settings, get_settings
 from app.security.jwt_auth import get_current_user_id
+from app.services.supabase_admin import supabase_admin_delete_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/account", tags=["account"])
@@ -40,18 +41,8 @@ def delete_account(
             detail="Supabase not configured",
         )
 
-    url = f"{settings.supabase_url.rstrip('/')}/auth/v1/admin/users/{user_id}"
-    key = settings.supabase_admin_key
-
     try:
-        res = httpx.delete(
-            url,
-            headers={
-                "apikey": key,
-                "Authorization": f"Bearer {key}",
-            },
-            timeout=20.0,
-        )
+        res = supabase_admin_delete_user(user_id)
     except httpx.HTTPError as exc:
         logger.warning("delete_account_upstream error=%s user=%s", type(exc).__name__, user_id)
         raise HTTPException(
