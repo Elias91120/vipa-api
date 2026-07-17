@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from supabase import Client
+from app.services.pricing import AdminClient
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def find_user_id_by_creator(client: Client, creator_id: str) -> str | None:
+def find_user_id_by_creator(client: AdminClient, creator_id: str) -> str | None:
     res = (
         client.table("profiles")
         .select("id")
@@ -38,7 +38,7 @@ def find_user_id_by_creator(client: Client, creator_id: str) -> str | None:
     return data.get("id")
 
 
-def already_processed(client: Client, event_id: str | None) -> bool:
+def already_processed(client: AdminClient, event_id: str | None) -> bool:
     if not event_id:
         return False
     res = (
@@ -53,7 +53,7 @@ def already_processed(client: Client, event_id: str | None) -> bool:
 
 
 def record_event(
-    client: Client,
+    client: AdminClient,
     *,
     event_id: str | None,
     event_type: str,
@@ -72,7 +72,7 @@ def record_event(
     client.table("vipagence_webhook_events").insert(row).execute()
 
 
-def process_webhook(client: Client, payload: dict[str, Any]) -> dict[str, Any]:
+def process_webhook(client: AdminClient, payload: dict[str, Any]) -> dict[str, Any]:
     event_type = payload.get("event_type") or payload.get("type")
     event_id = payload.get("event_id") or payload.get("id")
     data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
@@ -141,7 +141,7 @@ def _require_creator_id(data: dict[str, Any]) -> str:
     return creator_id
 
 
-def _resolve_user(client: Client, data: dict[str, Any]) -> tuple[str, str]:
+def _resolve_user(client: AdminClient, data: dict[str, Any]) -> tuple[str, str]:
     creator_id = _require_creator_id(data)
     user_id = find_user_id_by_creator(client, creator_id)
     if not user_id:
@@ -149,7 +149,7 @@ def _resolve_user(client: Client, data: dict[str, Any]) -> tuple[str, str]:
     return creator_id, user_id
 
 
-def _handle_creator_status(client: Client, data: dict[str, Any]) -> None:
+def _handle_creator_status(client: AdminClient, data: dict[str, Any]) -> None:
     creator_id = _require_creator_id(data)
     status = data.get("status")
     if not status or not isinstance(status, str) or status not in VALID_CREATOR_STATUSES:
@@ -165,7 +165,7 @@ def _handle_creator_status(client: Client, data: dict[str, Any]) -> None:
         raise SyncError(f"No VIPA profile linked to creator_id={creator_id}", status_code=404)
 
 
-def _handle_campaign_upsert(client: Client, data: dict[str, Any]) -> None:
+def _handle_campaign_upsert(client: AdminClient, data: dict[str, Any]) -> None:
     creator_id, user_id = _resolve_user(client, data)
     source_id = data.get("source_id") or data.get("campaign_id")
     if not source_id or not isinstance(source_id, str):
@@ -185,7 +185,7 @@ def _handle_campaign_upsert(client: Client, data: dict[str, Any]) -> None:
     logger.info("campaign_upsert creator_id=%s source_id=%s", creator_id, source_id)
 
 
-def _handle_campaign_deleted(client: Client, data: dict[str, Any]) -> None:
+def _handle_campaign_deleted(client: AdminClient, data: dict[str, Any]) -> None:
     creator_id, user_id = _resolve_user(client, data)
     source_id = data.get("source_id") or data.get("campaign_id")
     if not source_id or not isinstance(source_id, str):
@@ -194,7 +194,7 @@ def _handle_campaign_deleted(client: Client, data: dict[str, Any]) -> None:
     logger.info("campaign_deleted creator_id=%s source_id=%s", creator_id, source_id)
 
 
-def _handle_training_upsert(client: Client, data: dict[str, Any]) -> None:
+def _handle_training_upsert(client: AdminClient, data: dict[str, Any]) -> None:
     creator_id, user_id = _resolve_user(client, data)
     source_id = data.get("source_id") or data.get("training_id")
     if not source_id or not isinstance(source_id, str):
@@ -213,7 +213,7 @@ def _handle_training_upsert(client: Client, data: dict[str, Any]) -> None:
     logger.info("training_upsert creator_id=%s source_id=%s", creator_id, source_id)
 
 
-def _handle_training_deleted(client: Client, data: dict[str, Any]) -> None:
+def _handle_training_deleted(client: AdminClient, data: dict[str, Any]) -> None:
     creator_id, user_id = _resolve_user(client, data)
     source_id = data.get("source_id") or data.get("training_id")
     if not source_id or not isinstance(source_id, str):
@@ -223,7 +223,7 @@ def _handle_training_deleted(client: Client, data: dict[str, Any]) -> None:
 
 
 def redeem_creator_code(
-    client: Client,
+    client: AdminClient,
     *,
     user_id: str,
     code: str,

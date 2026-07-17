@@ -7,11 +7,11 @@ from datetime import datetime, timezone
 from typing import Any, Literal
 
 import stripe
-from supabase import Client
 
 from app.config import Settings
 from app.services.pricing import (
     PREMIUM_STATUSES,
+    AdminClient,
     get_plan_by_key,
     get_plan_by_stripe_price,
     resolve_cohort,
@@ -42,7 +42,7 @@ def _ts_to_iso(ts: int | None) -> str | None:
 
 
 def ensure_stripe_customer(
-    client: Client,
+    client: AdminClient,
     settings: Settings,
     *,
     user_id: str,
@@ -80,7 +80,7 @@ def ensure_stripe_customer(
 
 
 def create_checkout_session(
-    client: Client,
+    client: AdminClient,
     settings: Settings,
     *,
     user_id: str,
@@ -168,7 +168,7 @@ def create_checkout_session(
 
 
 def create_portal_session(
-    client: Client,
+    client: AdminClient,
     settings: Settings,
     *,
     user_id: str,
@@ -193,7 +193,7 @@ def create_portal_session(
     return {"url": session["url"]}
 
 
-def already_processed_event(client: Client, event_id: str) -> bool:
+def already_processed_event(client: AdminClient, event_id: str) -> bool:
     res = (
         client.table("stripe_webhook_events")
         .select("id,status")
@@ -206,7 +206,7 @@ def already_processed_event(client: Client, event_id: str) -> bool:
 
 
 def record_webhook_event(
-    client: Client,
+    client: AdminClient,
     *,
     event_id: str,
     event_type: str,
@@ -235,7 +235,7 @@ def _user_id_from_subscription(sub: dict[str, Any]) -> str | None:
     return None
 
 
-def _user_id_from_customer(client: Client, customer_id: str | None) -> str | None:
+def _user_id_from_customer(client: AdminClient, customer_id: str | None) -> str | None:
     if not customer_id:
         return None
     res = (
@@ -252,7 +252,7 @@ def _user_id_from_customer(client: Client, customer_id: str | None) -> str | Non
 
 
 def sync_subscription_from_stripe(
-    client: Client,
+    client: AdminClient,
     sub: dict[str, Any],
 ) -> None:
     """Mirror Stripe subscription → subscriptions + profiles entitlement."""
@@ -334,7 +334,7 @@ def sync_subscription_from_stripe(
 
 
 def handle_stripe_event(
-    client: Client,
+    client: AdminClient,
     settings: Settings,
     event: dict[str, Any],
 ) -> dict[str, Any]:

@@ -6,14 +6,24 @@ Never hardcode sellable prices in the Expo client.
 
 from __future__ import annotations
 
-from typing import Any, Literal
-
-from supabase import Client
+from typing import Any, Literal, Protocol
 
 Cohort = Literal["public", "creator"]
 Channel = Literal["web", "ios"]
 
 PREMIUM_STATUSES = frozenset({"trialing", "active", "past_due"})
+
+
+class _AdminTable(Protocol):
+    def select(self, columns: str = "*") -> Any: ...
+    def update(self, row: dict[str, Any]) -> Any: ...
+    def upsert(self, row: Any, on_conflict: str | None = None) -> Any: ...
+    def insert(self, row: Any) -> Any: ...
+    def delete(self) -> Any: ...
+
+
+class AdminClient(Protocol):
+    def table(self, name: str) -> _AdminTable: ...
 
 
 def resolve_cohort(profile: dict[str, Any] | None) -> Cohort:
@@ -27,7 +37,7 @@ def resolve_cohort(profile: dict[str, Any] | None) -> Cohort:
     return "public"
 
 
-def fetch_profile(client: Client, user_id: str) -> dict[str, Any] | None:
+def fetch_profile(client: AdminClient, user_id: str) -> dict[str, Any] | None:
     res = (
         client.table("profiles")
         .select(
@@ -44,7 +54,7 @@ def fetch_profile(client: Client, user_id: str) -> dict[str, Any] | None:
 
 
 def list_active_plans(
-    client: Client,
+    client: AdminClient,
     *,
     cohort: Cohort | None = None,
 ) -> list[dict[str, Any]]:
@@ -61,7 +71,7 @@ def list_active_plans(
     return [r for r in rows if isinstance(r, dict)]
 
 
-def get_plan_by_key(client: Client, plan_key: str) -> dict[str, Any] | None:
+def get_plan_by_key(client: AdminClient, plan_key: str) -> dict[str, Any] | None:
     res = (
         client.table("subscription_plans")
         .select("*")
@@ -74,7 +84,7 @@ def get_plan_by_key(client: Client, plan_key: str) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def get_plan_by_stripe_price(client: Client, price_id: str) -> dict[str, Any] | None:
+def get_plan_by_stripe_price(client: AdminClient, price_id: str) -> dict[str, Any] | None:
     if not price_id:
         return None
     res = (
@@ -114,7 +124,7 @@ def serialize_plan(plan: dict[str, Any], *, channel: Channel = "web") -> dict[st
 
 
 def build_personalized_offers(
-    client: Client,
+    client: AdminClient,
     *,
     user_id: str,
     channel: Channel = "web",
